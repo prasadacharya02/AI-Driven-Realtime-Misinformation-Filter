@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Analytics — Factify{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+{% block content %}
+<section class="py-4">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+      <div>
+        <div class="eyebrow">Live dashboard</div>
+        <h2 class="section-title mb-1">Analytics</h2>
+        <p class="section-sub mb-0">Where misinformation clusters and which sources get flagged.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <span class="badge bg-white border text-dark rounded-pill"><i class="bi bi-broadcast me-1"></i> Live</span>
+        <span class="badge bg-dark rounded-pill">{{ total }} total checks</span>
+      </div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="kpi text-center py-3"><div class="small text-muted fw-bold">REAL</div><div class="fs-3 fw-bolder" style="color:#059669">{{ real_total }}</div><div class="small text-muted">{{ (real_total/total*100) | round(1) if total else 0 }}%</div></div></div>
+      <div class="col-6 col-lg-3"><div class="kpi text-center py-3"><div class="small text-muted fw-bold">FAKE</div><div class="fs-3 fw-bolder" style="color:#DC2626">{{ fake_total }}</div><div class="small text-muted">{{ (fake_total/total*100) | round(1) if total else 0 }}%</div></div></div>
+      <div class="col-6 col-lg-3"><div class="kpi text-center py-3"><div class="small text-muted fw-bold">UNSURE</div><div class="fs-3 fw-bolder" style="color:#D97706">{{ unsure_total }}</div><div class="small text-muted">{{ (unsure_total/total*100) | round(1) if total else 0 }}%</div></div></div>
+      <div class="col-6 col-lg-3"><div class="kpi text-center py-3"><div class="small text-muted fw-bold">Covered countries</div><div class="fs-3 fw-bolder">{{ country_counts|length }}</div><div class="small text-muted">Heat intensity weighted</div></div></div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <div class="card-analytics">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="fw-bold mb-1"><i class="bi bi-geo-alt me-1"></i> Fake news geo heatmap</h5>
+              <p class="text-muted small mb-0">Weighted by verdict severity — FAKE=1.0, UNSURE=0.6, REAL=0.3</p>
+            </div>
+            <span class="badge bg-light border text-dark">Leaflet + HeatLayer</span>
+          </div>
+          <div id="map" class="mt-3"></div>
+          <div class="small text-muted mt-2">Tip: Zoom and pan. Hotter spots = more fake/unsure traffic.</div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card-analytics h-100">
+          <h5 class="fw-bold mb-1"><i class="bi bi-pie-chart me-1"></i> Verdict distribution</h5>
+          <p class="text-muted small">Overall split across all checks.</p>
+          <canvas id="donutChart" height="220"></canvas>
+          <div class="small text-muted mt-3">Last updated: {{ now().strftime('%d %b %Y, %I:%M %p') }}</div>
+          <a href="/factchecks" class="btn btn-dark w-100 rounded-pill mt-3"><i class="bi bi-shield-check me-1"></i> Run a check</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-analytics mt-3">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h5 class="fw-bold mb-1">Source activity</h5>
+          <p class="text-muted small mb-0">Top publishers by volume — stacked by verdict.</p>
+        </div>
+        {% if not source_activity %}
+          <span class="badge bg-warning text-dark">No data yet</span>
+        {% endif %}
+      </div>
+      {% if source_activity %}
+        <canvas id="sourceChart" height="120" class="mt-3"></canvas>
+      {% else %}
+        <div class="text-center py-5">
+          <div class="mx-auto d-flex align-items-center justify-content-center rounded-3 mb-3" style="width:56px;height:56px;background:#FFFBEB;color:#D97706"><i class="bi bi-bar-chart fs-4"></i></div>
+          <h6 class="fw-bold">No checks recorded yet</h6>
+          <p class="text-muted small">Browse latest headlines or run a fact check to populate analytics.</p>
+          <a href="/factchecks" class="btn btn-dark rounded-pill">Go to Fact Check</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  const HEAT_POINTS = {{ heat_points|tojson }};
+  const SRC_ACTIVITY = {{ source_activity|tojson }};
+  const DISTRIBUTION = {{ distribution|tojson }};
+
+  // MAP
+  const map = L.map('map').setView([20.59,78.96], 3);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap'}).addTo(map);
+  if (Array.isArray(HEAT_POINTS) && HEAT_POINTS.length){
+    const heat = L.heatLayer(HEAT_POINTS.map(p=>[p[0],p[1],p[2]]), {radius:32, blur:22, maxZoom:4, gradient:{0.2:'#4ADE80',0.4:'#FACC15',0.6:'#FB923C',0.8:'#DC2626'}});
+    heat.addTo(map);
+  } else {
+    // empty indicator marker on India
+    L.marker([20.59,78.96]).addTo(map).bindPopup("No heat data yet — run some checks").openPopup();
+  }
+  setTimeout(()=> map.invalidateSize(), 300);
+
+  // DONUT
+  const donutEl = document.getElementById('donutChart');
+  if (donutEl){
+    new Chart(donutEl, {
+      type:'doughnut',
+      data:{labels:['REAL','FAKE','UNSURE'], datasets:[{data:[DISTRIBUTION.REAL||0, DISTRIBUTION.FAKE||0, DISTRIBUTION.UNSURE||0], backgroundColor:['#10B981','#EF4444','#F59E0B'], borderWidth:0}]},
+      options:{
+        cutout:'62%',
+        plugins:{legend:{position:'bottom', labels:{usePointStyle:true, font:{family:'Inter', weight:'600'}}}},
+      }
+    });
+  }
+
+  // SOURCE STACKED BAR
+  if (SRC_ACTIVITY && Object.keys(SRC_ACTIVITY).length){
+    const labels = Object.keys(SRC_ACTIVITY);
+    const real = labels.map(k=> SRC_ACTIVITY[k].REAL||0);
+    const fake = labels.map(k=> SRC_ACTIVITY[k].FAKE||0);
+    const unsure = labels.map(k=> SRC_ACTIVITY[k].UNSURE||0);
+    new Chart(document.getElementById('sourceChart'),{
+      type:'bar',
+      data:{labels, datasets:[
+        {label:'REAL', data:real, backgroundColor:'rgba(16,185,129,.85)', stack:'v'},
+        {label:'FAKE', data:fake, backgroundColor:'rgba(239,68,68,.9)', stack:'v'},
+        {label:'UNSURE', data:unsure, backgroundColor:'rgba(245,158,11,.9)', stack:'v'},
+      ]},
+      options:{
+        responsive:true,
+        plugins:{legend:{position:'top', labels:{usePointStyle:true}}},
+        scales:{
+          x:{stacked:true, grid:{display:false}, ticks:{maxRotation:45, minRotation:20}},
+          y:{stacked:true, beginAtZero:true, ticks:{stepSize:1}}
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

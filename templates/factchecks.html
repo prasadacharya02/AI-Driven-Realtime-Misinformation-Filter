@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Fact Check — Factify{% endblock %}
+{% block head %}
+<style>
+.mode-tabs .nav-link{font-weight:700}
+.result-card .card-title{line-height:1.35}
+</style>
+{% endblock %}
+{% block content %}
+<section class="py-4">
+  <div class="container">
+    <div class="text-center mb-4">
+      <div class="eyebrow">Fact checker</div>
+      <h2 class="section-title mt-2">Verify any headline, keyword or link</h2>
+      <p class="section-sub">Paste it in — we’ll gather the sources and lay out the evidence clearly.</p>
+    </div>
+
+    <!-- SEARCH CARD -->
+    <div class="card-true p-3 p-lg-4 mx-auto" style="max-width:920px">
+      <ul class="nav nav-pills mode-tabs gap-2 mb-3" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if mode=='keyword' %}active{% endif %}" data-bs-toggle="pill" data-bs-target="#tab-keyword" type="button">Keyword</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if mode=='url' %}active{% endif %}" data-bs-toggle="pill" data-bs-target="#tab-url" type="button">URL</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if mode not in ['keyword','url'] %}active{% endif %}" data-bs-toggle="pill" data-bs-target="#tab-headlines" type="button">Headlines</button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <!-- KEYWORD -->
+        <div class="tab-pane fade {% if mode=='keyword' %}show active{% endif %}" id="tab-keyword">
+          <form method="GET" action="/factchecks" class="d-flex gap-2">
+            <input type="hidden" name="mode" value="keyword"/>
+            <div class="flex-grow-1 position-relative">
+              <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+              <input name="q" value="{{ query if mode=='keyword' else '' }}" class="form-control ps-5" style="padding:14px 16px; border-radius:12px" placeholder="e.g., RBI repo rate unchanged, UPI limit, ISRO moon mission" required/>
+            </div>
+            <button class="btn btn-dark rounded-pill px-4" type="submit"><i class="bi bi-shield-check me-1"></i> Check</button>
+          </form>
+          <div class="small text-muted mt-2">We look through trusted archives and recent coverage, then line up what we find.</div>
+        </div>
+
+        <!-- URL -->
+        <div class="tab-pane fade {% if mode=='url' %}show active{% endif %}" id="tab-url">
+          <form method="GET" action="/factchecks" class="d-flex gap-2">
+            <input type="hidden" name="mode" value="url"/>
+            <div class="flex-grow-1 position-relative">
+              <i class="bi bi-link-45deg position-absolute top-50 start-0 translate-middle-y ms-3 text-muted fs-5"></i>
+              <input name="q" value="{{ query if mode=='url' else '' }}" class="form-control ps-5" style="padding:14px 16px; border-radius:12px" placeholder="Paste a news URL, tweet link or forwarded article: https://..." required/>
+            </div>
+            <button class="btn btn-dark rounded-pill px-4" type="submit">Verify URL</button>
+          </form>
+          <div class="small text-muted mt-2">We open the link, pull the story text and compare carefully.</div>
+        </div>
+
+        <!-- HEADLINES -->
+        <div class="tab-pane fade {% if mode not in ['keyword','url'] %}show active{% endif %}" id="tab-headlines">
+          <form method="GET" action="/factchecks" class="d-flex gap-2">
+            <input type="hidden" name="mode" value="headlines"/>
+            <div class="flex-grow-1 position-relative">
+              <i class="bi bi-type-h1 position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+              <input name="q" value="{{ query if mode not in ['keyword','url'] else '' }}" class="form-control ps-5" style="padding:14px 16px; border-radius:12px" placeholder="Paste the exact headline you saw on WhatsApp/Twitter" required/>
+            </div>
+            <button class="btn btn-dark rounded-pill px-4" type="submit">Check headline</button>
+          </form>
+          <div class="small text-muted mt-2">Best for forwards — paste the exact line as you received it.</div>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <span class="small text-muted fw-semibold me-1">Examples:</span>
+        <a class="badge rounded-pill bg-light text-dark border" href="/factchecks?mode=keyword&q=Government+announces+free+LPG+cylinders">free LPG claim</a>
+        <a class="badge rounded-pill bg-light text-dark border" href="/factchecks?mode=keyword&q=ISRO+cryogenic+engine+test">ISRO engine</a>
+        <a class="badge rounded-pill bg-light text-dark border" href="/factchecks?mode=url&q=https://pib.gov.in">pib.gov.in</a>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="mt-4" style="max-width:1120px; margin-inline:auto">
+      {% if query %}
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div>
+            <span class="badge bg-white border text-dark rounded-pill"><i class="bi bi-search me-1"></i> {{ mode|upper }}</span>
+            <span class="fw-bold ms-2">“{{ query }}”</span>
+            <span class="text-muted">• {{ total }} result{{ '' if total==1 else 's' }}</span>
+          </div>
+          {% if total>0 %}
+          <div class="small text-muted">Page {{ page }} of {{ (total // per_page) + (1 if total % per_page else 0) }}</div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if result and result|length>0 %}
+        <div class="row g-3">
+          {% for r in result %}
+          <div class="col-md-6 col-lg-4">
+            <div class="card card-true result-card h-100">
+              <div class="position-relative">
+                <img src="{{ r.image }}" class="card-img-top" alt="{{ r.title }}" loading="lazy"/>
+                <span class="position-absolute top-0 start-0 m-2 badge-verdict badge-{{ r.status }}">{{ r.status }}</span>
+                <span class="position-absolute top-0 end-0 m-2 badge bg-white text-dark border small">{{ r.confidence }}%</span>
+              </div>
+              <div class="card-body d-flex flex-column">
+                <h6 class="card-title fw-bold">{{ r.title }}</h6>
+                <div class="small text-muted mb-2"><i class="bi bi-globe me-1"></i>{{ r.source }}</div>
+
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <div class="confidence-track flex-grow-1"><div class="confidence-fill fill-{{ r.status }}" data-width="{{ r.confidence|round(0, 'floor')|int }}" style="width:0%"></div></div>
+                  <span class="small fw-bold" style="min-width:44px; text-align:right">{{ r.confidence }}%</span>
+                </div>
+
+                <p class="small text-muted mb-2" style="line-height:1.5">{{ r.description }}</p>
+                <p class="small mb-3" style="color:#64748B"><i class="bi bi-clock me-1"></i> Checked on {{ now().strftime('%d %b %Y, %I:%M %p') }}</p>
+
+                <div class="mt-auto d-flex gap-2">
+                  <a href="{{ r.url }}" target="_blank" class="btn btn-dark btn-sm rounded-pill flex-grow-1"><i class="bi bi-box-arrow-up-right me-1"></i> Read article</a>
+                  <a href="/factchecks?mode=url&q={{ r.url|urlencode }}" class="btn btn-ghost btn-sm rounded-pill">Re-check</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if total > per_page %}
+        <nav class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% set pages = (total // per_page) + (1 if total % per_page else 0) %}
+            {% for i in range(1, pages+1) %}
+              <li class="page-item {% if i==page %}active{% endif %}">
+                <a class="page-link rounded-pill mx-1" href="{{ url_for('factchecks', mode=mode, q=query, page=i) }}">{{ i }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+        {% endif %}
+
+      {% elif query %}
+        <div class="card-true p-5 text-center">
+          <div class="mx-auto d-flex align-items-center justify-content-center rounded-3 mb-3" style="width:56px;height:56px;background:#FEF2F2;color:#DC2626"><i class="bi bi-shield-exclamation fs-4"></i></div>
+          <h5 class="fw-bold">No matches found</h5>
+          <p class="text-muted">Try a broader keyword or check the URL for typos. You can also try <strong>Headlines</strong> mode with the exact sentence.</p>
+          <a href="/factchecks" class="btn btn-dark rounded-pill mt-1">Clear search</a>
+        </div>
+      {% else %}
+        <div class="row g-3 mt-2">
+          <div class="col-md-4"><div class="p-4 bg-white border rounded-4 h-100"><div class="fw-bold"><i class="bi bi-lightbulb me-1"></i> Tip: Keyword mode</div><p class="text-muted small mb-0 mt-1">Best for topics like “RBI policy”, “monsoon”, “UPI”. We find multiple sources and score each.</p></div></div>
+          <div class="col-md-4"><div class="p-4 bg-white border rounded-4 h-100"><div class="fw-bold"><i class="bi bi-link me-1"></i> Tip: URL mode</div><p class="text-muted small mb-0 mt-1">Paste a forwarded link. We extract its text and run debunk + similarity checks.</p></div></div>
+          <div class="col-md-4"><div class="p-4 bg-white border rounded-4 h-100"><div class="fw-bold"><i class="bi bi-type me-1"></i> Tip: Headlines mode</div><p class="text-muted small mb-0 mt-1">Paste the exact viral headline. Ideal for WhatsApp forwards.</p></div></div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

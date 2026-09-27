@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Trending — Factify{% endblock %}
+{% block content %}
+<section class="py-4">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+      <div>
+        <div class="eyebrow">Pulse</div>
+        <h2 class="section-title mb-1"><i class="bi bi-fire text-danger"></i> Trending now</h2>
+        <p class="section-sub mb-0">Hot stories everyone’s talking about — verify before you share.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/latest" class="btn btn-ghost btn-sm rounded-pill">Latest</a>
+        <a href="/factchecks" class="btn btn-primary-true btn-sm"><i class="bi bi-shield-check me-1"></i> Verify a claim</a>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      {% for item in news %}
+      <div class="col-md-6 col-lg-4">
+        <article class="card-true h-100 d-flex flex-column">
+          <div class="position-relative">
+            <img src="{{ item.image }}" class="card-img-top" alt="{{ item.title }}" loading="lazy"/>
+            <span class="position-absolute top-0 start-0 m-2 badge rounded-pill bg-danger"><i class="bi bi-graph-up-arrow me-1"></i> TRENDING</span>
+          </div>
+          <div class="p-3 flex-grow-1 d-flex flex-column">
+            <div class="small text-muted fw-semibold mb-1">{{ item.source }}</div>
+            <h6 class="fw-bold" style="line-height:1.35">{{ item.title }}</h6>
+            <div class="mt-auto d-flex gap-2 pt-3">
+              <a href="{{ item.url }}" target="_blank" class="btn btn-ghost btn-sm rounded-pill flex-grow-1">Read</a>
+              <a href="/factchecks?mode=keyword&q={{ item.title|urlencode }}" class="btn btn-dark btn-sm rounded-pill">Verify</a>
+            </div>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

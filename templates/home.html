@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Factify — Check Before You Share{% endblock %}
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <div class="d-inline-flex align-items-center gap-2 mb-3">
+          <span class="badge-soft rounded-pill px-3 py-2"><i class="bi bi-shield-check me-1"></i> MADE FOR EVERYDAY READERS</span>
+          <span class="small text-muted fw-semibold d-none d-md-inline">No hype, just evidence</span>
+        </div>
+        <h1 class="display fw-bolder" style="font-size:clamp(2.1rem,5vw,3.15rem); line-height:.96">
+          Check before<br/>
+          <span style="background:linear-gradient(90deg,#0F766E,#0EA5E9); -webkit-background-clip:text; -webkit-text-fill-color:transparent">you share.</span>
+        </h1>
+        <p class="lead mt-3" style="color:#475569; font-weight:500">
+          Factify looks at trusted Indian publications, compares the story text, and shows you a clear verdict — <strong>REAL / UNSURE / FAKE</strong> — with the source right beside it. Paste a headline, keyword or link.
+        </p>
+
+        <!-- Search -->
+        <form action="/factchecks" method="GET" class="hero-search d-flex align-items-center mt-4">
+          <input type="hidden" name="mode" value="keyword"/>
+          <div class="flex-grow-1 d-flex align-items-center px-2">
+            <i class="bi bi-search text-muted ms-2"></i>
+            <input name="q" class="form-control" placeholder="Try: RBI repo rate, ISRO test, that viral video you got on WhatsApp..." required/>
+          </div>
+          <button class="btn btn-primary-true" type="submit">Verify <i class="bi bi-arrow-right ms-1"></i></button>
+        </form>
+        <div class="d-flex flex-wrap gap-2 mt-3 small">
+          <span class="text-muted fw-semibold">Try:</span>
+          <a href="/factchecks?mode=keyword&q=UPI+transactions+fact+check" class="badge rounded-pill bg-white border text-dark">UPI fact check</a>
+          <a href="/factchecks?mode=keyword&q=viral+video+fake" class="badge rounded-pill bg-white border text-dark">viral video</a>
+          <a href="/factchecks?mode=url&q=https://pib.gov.in" class="badge rounded-pill bg-white border text-dark">Verify a link</a>
+        </div>
+
+        <!-- KPIs -->
+        <div class="row g-2 mt-4">
+          <div class="col-4"><div class="kpi text-center"><strong>12+</strong><br/><span>Trusted sources</span></div></div>
+          <div class="col-4"><div class="kpi text-center"><strong>Curated</strong><br/><span>Hand-picked stories</span></div></div>
+          <div class="col-4"><div class="kpi text-center"><strong>&lt;3s</strong><br/><span>To verdict</span></div></div>
+        </div>
+        <p class="small text-muted mt-2">Built by students, for readers. We show our work — every verdict links to its source.</p>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="hero-card p-0 animate-in">
+          <div class="p-3 d-flex align-items-center justify-content-between border-bottom bg-white">
+            <div class="d-flex align-items-center gap-2">
+              <img src="{{ url_for('static', filename='images/logo-icon.png') }}" style="width:28px;height:28px;object-fit:contain;border-radius:6px;"/>
+              <span class="fw-bold small">How a check looks</span>
+            </div>
+            <span class="badge" style="background:#F8FAFC; color:#334155; border:1px solid #E2E8F0">Factify • hand-checked</span>
+          </div>
+          <div class="p-4">
+            <div class="d-flex gap-3">
+              <img src="https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=200&auto=format&fit=crop&q=60" class="rounded-3" style="width:96px;height:96px;object-fit:cover"/>
+              <div class="flex-grow-1">
+                <div class="small text-muted fw-semibold"><span class="badge-REAL badge-verdict me-1">REAL</span> The Hindu • 94.2% confidence</div>
+                <div class="fw-bold mt-1" id="heroDemoText" style="line-height:1.3; min-height:44px">Government announces new education policy: 5 key changes explained</div>
+                <div class="confidence-track mt-2"><div class="confidence-fill fill-REAL" data-width="94" style="width:0%"></div></div>
+              </div>
+            </div>
+            <div class="row g-3 mt-3">
+              <div class="col-6">
+                <div class="p-3 rounded-4" style="background:#ECFDF5; border:1px solid #A7F3D0">
+                  <div class="fw-bold small" style="color:#065F46"><i class="bi bi-check-circle me-1"></i> Why REAL?</div>
+                  <div class="small mt-1" style="color:#065F46">Known publication + story text matches headline + no debunk flags.</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 rounded-4" style="background:#FFFBEB; border:1px solid #FDE68A">
+                  <div class="fw-bold small" style="color:#92400E"><i class="bi bi-exclamation-triangle me-1"></i> When UNSURE</div>
+                  <div class="small mt-1" style="color:#92400E">We couldn’t find enough coverage. We show what we found so you decide.</div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 d-flex gap-2">
+              <a href="/factchecks" class="btn btn-dark rounded-pill flex-grow-1"><i class="bi bi-check2-square me-1"></i> Try Factify</a>
+              <a href="/analytics" class="btn btn-ghost rounded-pill"><i class="bi bi-graph-up"></i> See trends</a>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 mt-3 small text-muted justify-content-center">
+          <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-lock"></i> No login needed</span>
+          <span>•</span>
+          <span>Crafted by Batch-08</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-4">
+      <div class="eyebrow">How it works</div>
+      <h2 class="section-title mt-2">From headline to evidence, in three steps</h2>
+      <p class="section-sub">No black box — just careful comparison you can follow.</p>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="card-true p-4 h-100">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style="width:44px;height:44px;background:#E0F2FE;color:#0284C7"><i class="bi bi-collection fs-5"></i></div>
+          <h5 class="fw-bold">1. Gather</h5>
+          <p class="text-muted mb-0">We pull related stories from trusted archives and recent news, remove duplicates and open the articles properly.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-true p-4 h-100">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style="width:44px;height:44px;background:#FEF3C7;color:#92400E"><i class="bi bi-search fs-5"></i></div>
+          <h5 class="fw-bold">2. Compare</h5>
+          <p class="text-muted mb-0">Headline vs. story text are compared side-by-side. We look for matching details and language that signals a debunk.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-true p-4 h-100">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style="width:44px;height:44px;background:#DCFCE7;color:#065F46"><i class="bi bi-journal-check fs-5"></i></div>
+          <h5 class="fw-bold">3. Show</h5>
+          <p class="text-muted mb-0">You get a verdict with a confidence bar and the original source — <span class="badge-REAL badge-verdict">REAL</span> <span class="badge-UNSURE badge-verdict">UNSURE</span> <span class="badge-FAKE badge-verdict">FAKE</span> — ready to share.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED GRID -->
+<section class="pb-2">
+  <div class="container">
+    <div class="d-flex align-items-end justify-content-between mb-3">
+      <div>
+        <h3 class="section-title mb-1">Today’s picks</h3>
+        <p class="section-sub mb-0">Tap “Verify” on any story to see the evidence.</p>
+      </div>
+      <div class="d-none d-md-flex gap-2">
+        <a href="/latest" class="btn btn-ghost btn-sm rounded-pill">Latest</a>
+        <a href="/trending" class="btn btn-dark btn-sm rounded-pill">Trending <i class="bi bi-arrow-up-right ms-1"></i></a>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      {% for item in news %}
+      <div class="col-md-6 col-lg-4">
+        <article class="card-true h-100 d-flex flex-column">
+          <div class="position-relative">
+            <img src="{{ item.image }}" class="card-img-top" alt="{{ item.title }}" loading="lazy"/>
+            <span class="position-absolute top-0 start-0 m-2 badge bg-white text-dark border fw-bold"><i class="bi bi-newspaper me-1"></i>{{ item.source }}</span>
+            <a href="/factchecks?mode=keyword&q={{ item.title|urlencode }}" class="position-absolute top-0 end-0 m-2 btn btn-sm btn-dark rounded-pill"><i class="bi bi-check2-square me-1"></i> Verify</a>
+          </div>
+          <div class="p-3 flex-grow-1 d-flex flex-column">
+            <h6 class="fw-bold" style="line-height:1.35">{{ item.title }}</h6>
+            <div class="mt-auto d-flex gap-2 pt-3">
+              <a href="{{ item.url }}" target="_blank" class="btn btn-ghost btn-sm rounded-pill flex-grow-1"><i class="bi bi-box-arrow-up-right me-1"></i> Read</a>
+              <a href="/factchecks?mode=url&q={{ item.url|urlencode }}" class="btn btn-dark btn-sm rounded-pill"><i class="bi bi-link-45deg"></i> Check link</a>
+            </div>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-4 d-md-none">
+      <a href="/latest" class="btn btn-ghost rounded-pill">View latest</a>
+      <a href="/trending" class="btn btn-dark rounded-pill ms-2">Trending</a>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST SECTION -->
+<section class="py-5">
+  <div class="container">
+    <div class="card-true p-4 p-lg-5" style="background:linear-gradient(180deg,#FFFFFF,#F8FAFC)">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-6">
+          <div class="eyebrow">Why Factify</div>
+          <h3 class="fw-bolder mt-2">Made to be calm, clear and useful</h3>
+          <ul class="list-unstyled mt-3 d-flex flex-column gap-2">
+            <li class="d-flex gap-2"><i class="bi bi-check2 text-success"></i><span><strong>Sources you recognise</strong> — we favour The Hindu, Indian Express, PIB and other verified publications, but we still show you why.</span></li>
+            <li class="d-flex gap-2"><i class="bi bi-check2 text-success"></i><span><strong>Evidence, not hype</strong> — every result keeps its photo, link and a short excerpt.</span></li>
+            <li class="d-flex gap-2"><i class="bi bi-check2 text-success"></i><span><strong>Works anywhere</strong> — curated archive inside, so it’s useful even without an API key.</span></li>
+            <li class="d-flex gap-2"><i class="bi bi-check2 text-success"></i><span><strong>Honest about limits</strong> — if we’re unsure, we say so and let you judge.</span></li>
+          </ul>
+          <div class="d-flex gap-2 mt-3">
+            <a href="/factchecks" class="btn btn-primary-true">Start checking — it’s free</a>
+            <a href="/analytics" class="btn btn-ghost">See trends</a>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="p-3 bg-white rounded-4 border">
+            <div class="fw-bold mb-2 d-flex align-items-center gap-2"><img src="{{ url_for('static', filename='images/logo-icon.png') }}" style="width:22px;height:22px;object-fit:contain"/> What you get</div>
+            <div class="row g-2 small">
+              <div class="col-6"><div class="p-3 rounded-3" style="background:#F8FAFC; border:1px solid #E2E8F0"><strong>Verdict</strong><br/><span class="text-muted">94.2% • REAL</span><div class="confidence-track mt-2"><div class="confidence-fill fill-REAL" data-width="94" style="width:94%"></div></div></div></div>
+              <div class="col-6"><div class="p-3 rounded-3" style="background:#F8FAFC; border:1px solid #E2E8F0"><strong>Source</strong><br/><span class="text-muted">Original link + photo</span></div></div>
+              <div class="col-6"><div class="p-3 rounded-3" style="background:#F8FAFC; border:1px solid #E2E8F0"><strong>Excerpt</strong><br/><span class="text-muted">Short, readable summary</span></div></div>
+              <div class="col-6"><div class="p-3 rounded-3" style="background:#F8FAFC; border:1px solid #E2E8F0"><strong>Share</strong><br/><span class="text-muted">Copy a direct link</span></div></div>
+            </div>
+            <div class="alert alert-light border small mb-0 mt-3 d-flex gap-2"><i class="bi bi-lightbulb"></i><span>Tip: got a forwarded message? Use <strong>Link</strong> mode and paste it before you forward.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
