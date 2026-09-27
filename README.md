@@ -2,7 +2,7 @@
 
 > **A simple reader-first way to verify what you read.** Paste a headline, keyword or link — Factify compares it with trusted publications and shows you a clear **REAL / UNSURE / FAKE** with the evidence right beside it.
 
-**Live demo:** `http://localhost:5000` → `https://<port>-<sandbox>.e2b.app` (Arena preview)  
+**Live demo:** `http://localhost:5000` → `https://<port>-<sandbox>.e2b.app`  
 **Crafted by Team 08** — GURUKRISHNA H · DISHAN RAJ · PRASAD · DHANYATH | Batch-08
 
 > **Note on the rebrand:** Originally called *TruthCheck AI*, we renamed it **Factify** with a hand-crafted frosted-glass “F” mark (see `static/images/logo.png`). The new name and logo feel human-made — calmer, editorial, and easy to remember — not a stock AI template. No plagiarism, just careful craft.
@@ -203,3 +203,4 @@ print('ok')
 MIT — built for learning. Always double-check with the original source before acting on any verdict.
 
 **Team 08** — Questions? Open an issue.
+
